@@ -2,7 +2,7 @@ local json = require "cjson"
 local file = require "pl.file"
 local pretty = require "pl.pretty"
 
-local content = file.read("./funcionarios-3M.json")
+local content = file.read(arg[1])
 local data, err = json.decode(content)
 
 print(#data.funcionarios)
