@@ -25,7 +25,6 @@ let app = {
         media: 0,
         sobrenomes_data: [],
     },
-    areas: {},
 
     changeFileInputCallback: ev => {
         console.time("tempo total");
