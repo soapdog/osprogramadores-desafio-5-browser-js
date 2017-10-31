@@ -124,10 +124,10 @@ let app = {
 
         app.report.media /= app.report.total;
 
-         Object.keys(app.report.departamentos_data).map((k) => {
+        for (let k in app.report.departamentos_data) {
             let d = app.report.departamentos_data[k];
             app.report.departamentos_data[k] = { total: d.total, media: (d.media / d.total), max: 0, max_f: "", min: 99999999, min_f: "" }
-        });
+        };
 
         // Questão 3
 
@@ -172,6 +172,35 @@ let report = {
             m("span", data)
         ]);
     },
+    departamentos: (d) => {
+        let ret = []
+        for (let k in d.departamentos_data) {
+            let h = d.departamentos_data[k];
+            ret.push([
+                m("h3", `Área ${k}`),
+                report.item("Média salarial", Math.round(h.media, 2)),
+                report.item("Maior salário", h.max),
+                report.item("Funcionários com o maior salário", h.max_f),
+                report.item("Menor salário", h.min),
+                report.item("Funcionários com menor salário", h.min_f),
+                m("hr"),
+            ])
+        }
+        return ret;
+    },
+    sobrenomes: (d) => {
+        let ret = []
+        for (let k in d.sobrenomes_data) {
+            let h = d.sobrenomes_data[k];
+            ret.push([
+                m("h3", `Sobrenome ${k}`),
+                report.item("Maior salário", h.max),
+                report.item("Funcionários com o maior salário", h.max_f),
+                m("hr"),
+            ])
+        }
+        return ret;
+    },
     view: vnode => {
         let d = vnode.attrs.data;
         return [
@@ -191,30 +220,9 @@ let report = {
             report.item("Maior quantidade de funcionários ", d.max_d),
             report.item("Departamento com a maior quantidade de funcionários", d.max_d_n),
             m("hr"),
-            Object.keys(d.departamentos_data).map((k) => {
-                let h = d.departamentos_data[k];
-                return [
-                    m("h3", `Área ${k}`),
-                    report.item("Média salarial", Math.round(h.media, 2)),
-                    report.item("Maior salário", h.max),
-                    report.item("Funcionários com o maior salário", h.max_f),
-                    report.item("Menor salário", h.min),
-                    report.item("Funcionários com menor salário", h.min_f),
-                    m("hr"),
-                ]
-            }),
+            report.departamentos(d),
             m("hr"),
-            Object.keys(d.sobrenomes_data).map((k) => {
-                let h = d.sobrenomes_data[k];
-                if (h.total > 1) {
-                    return [
-                        m("h3", `Sobrenome ${k}`),
-                        report.item("Maior salário", h.max),
-                        report.item("Funcionários com o maior salário", h.max_f),
-                        m("hr"),
-                    ]
-                }
-            })
+            report.sobrenomes(d)
         ]
     }
 }
