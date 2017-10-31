@@ -123,7 +123,7 @@ end
 -- Questao 3
 for d, q in pairs(report.departamentos) do 
     if (q == report.max_d) then
-        table.push(report.max_d_n, d)
+        table.insert(report.max_d_n, d)
     end
 
     if (q > report.max_d) then
@@ -132,7 +132,7 @@ for d, q in pairs(report.departamentos) do
     end
 
     if (q == report.min_d) then
-        table.push(report.min_d_n, d)
+        table.insert(report.min_d_n, d)
     end
 
     if (q < report.min_d) then
