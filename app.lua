@@ -5,8 +5,6 @@ local pretty = require "pl.pretty"
 local content = file.read(arg[1])
 local data, err = json.decode(content)
 
-print(#data.funcionarios)
-
 function showname(funcionarios)
     local ret = ""
 
@@ -15,6 +13,14 @@ function showname(funcionarios)
     end
 
     return ret
+end
+
+function showarea(area)
+    for _, a in ipairs(data.areas) do
+        if area == a.codigo then
+            return a.nome
+        end
+    end
 end
 
 local report = {
@@ -29,37 +35,37 @@ local report = {
     max_f = {},
     min = 9999999999999,
     min_f = {},
-    media = 0,
+    media = 0.0,
     sobrenomes_data = {},
 }
 
 function processaQuestao2(f)
     if (f.salario == report.departamentos_data[f.area].max) then
-        table.insert(report.departamentos_data[f.area].max_f, f.nome .. " " .. f.sobrenome)
+        table.insert(report.departamentos_data[f.area].max_f, f)
     end
 
     if (f.salario > report.departamentos_data[f.area].max) then
-        report.departamentos_data[f.area].max_f = {f.nome .. " ".. f.sobrenome}
+        report.departamentos_data[f.area].max_f = {f}
         report.departamentos_data[f.area].max = f.salario
     end
 
     if (f.salario == report.departamentos_data[f.area].min) then
-        table.insert(report.departamentos_data[f.area].min_f,f.nome .. " ".. f.sobrenome)
+        table.insert(report.departamentos_data[f.area].min_f,f)
     end
 
     if (f.salario < report.departamentos_data[f.area].min) then
-        report.departamentos_data[f.area].min_f = {f.nome .. " ".. f.sobrenome}
+        report.departamentos_data[f.area].min_f = {f}
         report.departamentos_data[f.area].min = f.salario
     end
 end 
 
 function processaQuestao4(f)
   if (f.salario == report.sobrenomes_data[f.sobrenome].max) then
-        table.insert(report.sobrenomes_data[f.sobrenome].max_f, f.nome .. " ".. f.sobrenome)
+        table.insert(report.sobrenomes_data[f.sobrenome].max_f, f)
     end
 
     if (f.salario > report.sobrenomes_data[f.sobrenome].max) then
-        report.sobrenomes_data[f.sobrenome].max_f = {f.nome .. " ".. f.sobrenome}
+        report.sobrenomes_data[f.sobrenome].max_f = {f}
         report.sobrenomes_data[f.sobrenome].max = f.salario
     end
 end
@@ -74,26 +80,26 @@ for _, f in ipairs(data.funcionarios) do
     report.media = report.media + f.salario
 
     if (f.salario == report.max) then
-        table.insert(report.max_f, f.nome .. " " .. f.sobrenome)
+        table.insert(report.max_f, f)
     end
 
     if (f.salario > report.max) then
         report.max = f.salario
-        report.max_f = {f.nome .. " " .. f.sobrenome}
+        report.max_f = {f}
     end
 
     if (f.salario == report.min) then
-        table.insert(report.min_f, f.nome .. " " .. f.sobrenome)
+        table.insert(report.min_f, f)
     end
 
     if (f.salario < report.min) then
         report.min = f.salario
-        report.min_f = {f.nome .. " " .. f.sobrenome}
+        report.min_f = {f}
     end
 
     -- Departamentos
     if report.departamentos_data[f.area] == nil then
-        report.departamentos_data[f.area] = { total = 0, media = 0, max = 0, max_f = {}, min = 99999999, min_f = {} }
+        report.departamentos_data[f.area] = { total = 0, media = 0.0, max = 0, max_f = {}, min = 99999999, min_f = {} }
     end
     report.departamentos_data[f.area].total = report.departamentos_data[f.area].total + 1
     report.departamentos_data[f.area].media = report.departamentos_data[f.area].media + f.salario
@@ -109,16 +115,16 @@ end
 
 report.media = report.media / report.total
 
-for k, d in pairs(report.departamentos_data) do
-    report.departamentos_data[k] = { 
-        total = d.total, 
-        media = (d.media / d.total), 
-        max = 0, 
-        max_f = "",
-        min = 99999999, 
-        min_f = "" 
-    }
-end
+-- for k, d in pairs(report.departamentos_data) do
+--     report.departamentos_data[k] = { 
+--         total = d.total, 
+--         media = (d.media / d.total), 
+--         max = 0, 
+--         max_f = "",
+--         min = 99999999, 
+--         min_f = "" 
+--     }
+-- end
 
 -- Questao 3
 for d, q in pairs(report.departamentos) do 
@@ -143,23 +149,41 @@ end
 
 --print(pretty.write(report))
 
-print("Media salarial: " .. report.media)
-print("Maior salario: " .. report.max .. " de " .. pretty.write(report.max_f))
-print("Menor salario: " .. report.min .. " de " .. pretty.write(report.min_f))
+print("global_avg|" .. string.format("%.2f",report.media))
 
-print("Departamento com a menor quantidade de funcionários: " .. report.min_d .. " de " .. pretty.write(report.min_d_n))
-print("Departamento com a maior quantidade de funcionários: " .. report.max_d .. " de " .. pretty.write(report.max_d_n))
+for _, f in ipairs(report.max_f) do
+    print("global_max|" .. f.nome .. " " .. f.sobrenome .. "|" .. string.format("%.2f",f.salario))
+end
+
+for _, f in ipairs(report.min_f) do
+    print("global_min|" .. f.nome .. " " .. f.sobrenome .. "|" .. string.format("%.2f",f.salario))
+end
+
+for _, f in ipairs(report.max_d_n) do
+    print("most_employees|" .. showarea(f) .. "|" .. report.max_d)
+end
+
+for _, f in ipairs(report.min_d_n) do
+    print("least_employees|" .. showarea(f) .. "|" .. report.min_d)
+end
 
 for k, h in pairs(report.departamentos_data) do
-    print("AREA: " .. k)
-    print("Media salarial: " .. h.media)
-    print("Maior salario: " .. h.max .. " de " .. pretty.write(h.max_f))
-    print("Menor salario: " .. h.min .. " de " .. pretty.write(h.min_f))
+    print("area_avg|" .. showarea(k) .. "|" .. string.format("%.2f",h.media / h.total))
+
+
+    for _, f in ipairs(h.max_f) do
+        print("area_max|" .. showarea(k) .. "|" .. f.nome .. " " .. f.sobrenome .. "|" .. string.format("%.2f",f.salario))
+    end
+
+    for _, f in ipairs(h.min_f) do
+        print("area_min|" .. showarea(k) .. "|" .. f.nome .. " " .. f.sobrenome .. "|" .. string.format("%.2f",f.salario))
+    end
 end
 
 
 for k, h in pairs(report.sobrenomes_data) do
-    print("SOBRENOME: " .. k)
-    print("Maior salario: " .. h.max .. " de " .. pretty.write(h.max_f))
+    for _, f in ipairs(h.max_f) do
+        print("last_name_max|" .. f.sobrenome .. "|" .. f.nome .. " " .. f.sobrenome .. "|" .. string.format("%.2f",f.salario))
+    end
 end
 
